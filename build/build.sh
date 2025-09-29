@@ -13,7 +13,7 @@ NC='\033[0m'
 
 # Configuration
 PROJECT_NAME="magnetico"
-VERSION=$(git describe --tags --always --dirty 2>/dev/null || echo "dev")
+VERSION=$(cat VERSION 2>/dev/null || echo "dev")
 BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
 RELEASES_DIR="releases"
 

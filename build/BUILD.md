@@ -62,6 +62,21 @@ Builds macOS ARM64 binary locally:
 ./build-local-arm.sh -v
 ```
 
+### Pre-configured Docker Build Script (`build-docker-preconfigured.sh`)
+
+Builds a Docker image with SQLite database pre-configured:
+
+```bash
+# Build pre-configured Docker image
+./build-docker-preconfigured.sh
+```
+
+This creates a Docker image that includes:
+- Pre-configured SQLite database setup
+- Default environment variables
+- Health checks
+- Simplified deployment (no separate database container needed)
+
 ## Makefile Targets
 
 The Makefile provides convenient targets for common build operations:
@@ -84,6 +99,9 @@ make build-docker
 
 # Build locally for ARM
 make build-local-arm
+
+# Build pre-configured Docker image
+make build-docker-preconfigured
 
 # Clean build artifacts
 make clean

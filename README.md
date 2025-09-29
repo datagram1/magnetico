@@ -5,6 +5,7 @@
 [![CodeQL](https://github.com/tgragnato/magnetico/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tgragnato/magnetico/actions/workflows/codeql.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tgragnato/magnetico)](https://goreportcard.com/report/github.com/tgragnato/magnetico)
 [![codecov](https://codecov.io/gh/tgragnato/magnetico/branch/main/graph/badge.svg)](https://codecov.io/gh/tgragnato/magnetico)
+![Version](https://img.shields.io/badge/version-1.0.0.2-blue.svg)
 
 ![Flow of Operations](/doc/operations.svg)
 
@@ -37,9 +38,11 @@ This will automatically:
 
 #### Docker (Recommended for testing)
 ```bash
-docker pull ghcr.io/tgragnato/magnetico:latest
-docker run --rm -it -v <your_data_dir>:/data -p 8080:8080/tcp ghcr.io/tgragnato/magnetico:latest --addr=0.0.0.0:8080 --database=sqlite3:///data/magnetico.sqlite3
+docker pull ghcr.io/datagram1/magnetico:latest
+docker run --rm -it -v <your_data_dir>:/data -p 8080:8080/tcp ghcr.io/datagram1/magnetico:latest
 ```
+
+The Docker image comes pre-configured with SQLite database setup. The database will be automatically created and initialized on first run.
 
 #### From Source
 ```bash
@@ -61,8 +64,8 @@ After setting it up, you should create a user, set a password, create a database
 - `CREATE DATABASE magnetico OWNER magnetico;`
 - `\c magnetico`
 - `CREATE EXTENSION IF NOT EXISTS pg_trgm;`
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it -p 8080:8080/tcp ghcr.io/tgragnato/magnetico:latest --addr=0.0.0.0:8080 --database=postgres://magnetico:magnetico@localhost:5432/magnetico?sslmode=disable`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest --help`
+- `docker run --rm -it -p 8080:8080/tcp ghcr.io/datagram1/magnetico:latest --addr=0.0.0.0:8080 --database=postgres://magnetico:magnetico@localhost:5432/magnetico?sslmode=disable`
 - visit `http://localhost:8080`
 
 ### CockroachDB
@@ -72,8 +75,8 @@ It currently does not support the `pg_trgm` extension, which provides functions 
 
 - create a user and it's database
 - download the TLS certificate of your cluster
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it -v <your_cert_dir>:/data -p 8080:8080/tcp ghcr.io/tgragnato/magnetico:latest --addr=0.0.0.0:8080 --database=cockroach://magneticouser:magneticopass@mycluster.crdb.io:26257/magnetico?sslmode=verify-full&sslrootcert=/data/cc-ca.crt`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest --help`
+- `docker run --rm -it -v <your_cert_dir>:/data -p 8080:8080/tcp ghcr.io/datagram1/magnetico:latest --addr=0.0.0.0:8080 --database=cockroach://magneticouser:magneticopass@mycluster.crdb.io:26257/magnetico?sslmode=verify-full&sslrootcert=/data/cc-ca.crt`
 - visit `http://localhost:8080`
 
 ### ZeroMQ
@@ -81,24 +84,24 @@ It currently does not support the `pg_trgm` extension, which provides functions 
 ZeroMQ is a high-performance messaging library that provides a set of tools for communication between distributed applications.
 The integration is designed in the persistence layer as a ZMQ PUB firehose, and works under the zeromq and zmq URL schemas.
 
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest -d --database=zeromq://localhost:5555`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest --help`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest -d --database=zeromq://localhost:5555`
 
 ### RabbitMQ
 
 RabbitMQ is an open-source message broker that facilitates communication between distributed systems by queuing and routing messages. It supports multiple messaging protocols and ensures reliable message delivery for scalable applications.
 The integration is designed in the persistence layer following the Publish/Subscribe model, and operates over a durable queue named `magnetico` routed through an exchange.
 
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest -d --database=amqp://localhost:5672`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest --help`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest -d --database=amqp://localhost:5672`
 
 ### Bitmagnet
 
 Bitmagnet is a self-hosted BitTorrent indexer, DHT crawler, content classifier and torrent search engine with web UI, GraphQL API and Servarr stack integration.
 The integration is designed in the persistence layer as a producer for the import API endpoint, and works under the bitmagnet and bitmagnets URL schemas.
 
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest -d --database=bitmagnet://localhost:3333/import`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest --help`
+- `docker run --rm -it ghcr.io/datagram1/magnetico:latest -d --database=bitmagnet://localhost:3333/import`
 
 ## Features
 

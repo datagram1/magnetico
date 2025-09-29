@@ -1,0 +1,57 @@
+FROM golang:alpine3.21 AS builder
+ENV CGO_ENABLED=1
+ENV CGO_CFLAGS=-D_LARGEFILE64_SOURCE
+ENV CGO_LDFLAGS='-fuse-ld=lld -static -lstdc++ -lsodium -lzmq'
+ENV CC=clang
+RUN apk add --no-cache clang lld libc-dev musl-dev libstdc++ libsodium-dev libsodium-static zeromq-dev libzmq-static
+WORKDIR /workspace/bin
+RUN ln -s magnetico magneticod
+RUN ln -s magnetico magneticow
+WORKDIR /workspace
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+COPY . .
+RUN go build --tags fts5 -ldflags='-linkmode=external' -o bin/magnetico .
+
+FROM ghcr.io/anchore/syft:latest AS sbomgen
+COPY --from=builder /workspace/bin/magnetico /usr/bin/magnetico
+RUN ["/syft", "--output", "spdx-json=/magnetico.spdx.json", "/usr/bin/magnetico"]
+
+FROM cgr.dev/chainguard/static:latest
+WORKDIR /data
+
+# Copy the binary
+COPY --from=builder /workspace/bin /usr/bin
+COPY --from=sbomgen /magnetico.spdx.json /var/lib/db/sbom/magnetico.spdx.json
+
+# Create the database directory and initialize with a basic SQLite database
+# The database will be automatically created and configured by magnetico on first run
+RUN mkdir -p /data && \
+    chmod 755 /data
+
+# Set default environment variables for pre-configured setup
+ENV DATABASE_URL="sqlite3:///data/magnetico.sqlite3"
+ENV ADDR="0.0.0.0:8080"
+ENV MAX_RPS="500"
+ENV LEECH_MAX_N="1000"
+
+# Expose the web interface port
+EXPOSE 8080
+
+# Expose the DHT port
+EXPOSE 6881/udp
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/ || exit 1
+
+# Default command with pre-configured settings
+ENTRYPOINT ["/usr/bin/magnetico", "--addr=0.0.0.0:8080", "--database=sqlite3:///data/magnetico.sqlite3", "--web", "--daemon"]
+
+LABEL org.opencontainers.image.title="magnetico"
+LABEL org.opencontainers.image.description="Autonomous (self-hosted) BitTorrent DHT search engine with pre-configured database"
+LABEL org.opencontainers.image.url="https://github.com/datagram1/magnetico/"
+LABEL org.opencontainers.image.source="https://github.com/datagram1/magnetico"
+LABEL org.opencontainers.image.licenses="AGPL-3.0"
+LABEL io.containers.autoupdate=registry

@@ -1,11 +1,11 @@
 # Magnetico Makefile
 # Cross-platform build system
 
-.PHONY: help build build-all build-docker build-local-arm clean test install
+.PHONY: help build build-all build-docker build-local-arm build-docker-preconfigured clean test install
 
 # Configuration
 PROJECT_NAME := magnetico
-VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+VERSION := $(shell cat VERSION 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 RELEASES_DIR := releases
 
@@ -29,37 +29,52 @@ help: ## Show this help message
 	@echo "  make build-docker       # Build x86 platforms using Docker"
 	@echo "  make clean              # Clean build artifacts"
 
+# Version management
+version: ## Show current version
+	@./build/version.sh --show
+
+version-increment: ## Increment version
+	@./build/version.sh --increment
+
+version-tag: ## Create git tag for current version
+	@./build/version.sh --tag
+
 # Build all platforms
 build-all: ## Build all platforms (Docker for x86, local for ARM)
 	@echo "Building all platforms..."
-	@./build.sh --docker
+	@./build/build.sh --docker
 
 # Build using Docker for x86 platforms
 build-docker: ## Build x86 platforms using Docker
 	@echo "Building x86 platforms using Docker..."
-	@./build-docker.sh
+	@./build/build-docker.sh
 
 # Build macOS ARM64 locally
 build-local-arm: ## Build macOS ARM64 locally
 	@echo "Building macOS ARM64 locally..."
-	@./build-local-arm.sh
+	@./build/build-local-arm.sh
+
+# Build pre-configured Docker image
+build-docker-preconfigured: ## Build pre-configured Docker image with SQLite
+	@echo "Building pre-configured Docker image..."
+	@./build/build-docker-preconfigured.sh
 
 # Build specific platform
 build-darwin-amd64: ## Build macOS x86_64
 	@echo "Building macOS x86_64..."
-	@./build-docker.sh darwin-amd64
+	@./build/build-docker.sh darwin-amd64
 
 build-darwin-arm64: ## Build macOS ARM64
 	@echo "Building macOS ARM64..."
-	@./build-local-arm.sh
+	@./build/build-local-arm.sh
 
 build-linux-amd64: ## Build Linux x86_64
 	@echo "Building Linux x86_64..."
-	@./build-docker.sh linux-amd64
+	@./build/build-docker.sh linux-amd64
 
 build-windows-amd64: ## Build Windows x86_64
 	@echo "Building Windows x86_64..."
-	@./build-docker.sh windows-amd64
+	@./build/build-docker.sh windows-amd64
 
 # Clean build artifacts
 clean: ## Clean build artifacts
