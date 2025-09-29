@@ -1,0 +1,34 @@
+[Unit]
+Description=Magnetico DHT Search Engine
+Documentation=https://github.com/datagram1/magnetico
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/magnetico
+ExecStart=/opt/magnetico/magnetico --config=/etc/magnetico/config.yml
+User=magnetico
+Group=magnetico
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=magnetico
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/magnetico /etc/magnetico
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Environment
+Environment=GOMAXPROCS=0
+
+[Install]
+WantedBy=multi-user.target

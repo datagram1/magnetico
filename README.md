@@ -18,19 +18,35 @@ This allows anyone with a decent Internet connection to access the vast amount o
 **magnetico** liberates BitTorrent from the yoke of centralised trackers & web-sites and makes it
 *truly decentralised*. Finally!
 
-## Easy Run and Compilation
+## Quick Installation
 
-The easiest way to run magnetico is to use the OCI image built within the CI pipeline:
-- `docker pull ghcr.io/tgragnato/magnetico:latest`
-- `docker run --rm -it ghcr.io/tgragnato/magnetico:latest --help`
-- `docker run --rm -it -v <your_data_dir>:/data -p 8080:8080/tcp ghcr.io/tgragnato/magnetico:latest --addr=0.0.0.0:8080 --database=sqlite3:///data/magnetico.sqlite3`
-- visit `http://localhost:8080`
+The easiest way to install magnetico is using our universal installer:
 
-To compile using the standard Golang toolchain:
-- Download the latest golang release from [the official website](https://go.dev/dl/)
-- Follow the [installation instructions for your platform](https://go.dev/doc/install)
-- Checkout the repository and run `go install --tags fts5 .`
-- The `magnetico` binary is now available in your `$GOBIN` directory
+```bash
+curl -fsSL https://raw.githubusercontent.com/datagram1/magnetico/main/install.sh | bash
+```
+
+This will automatically:
+- Detect your platform (Linux, macOS, Windows)
+- Download the appropriate binary
+- Install dependencies (PostgreSQL, Nginx)
+- Configure the service
+- Start magnetico
+
+### Manual Installation
+
+#### Docker (Recommended for testing)
+```bash
+docker pull ghcr.io/tgragnato/magnetico:latest
+docker run --rm -it -v <your_data_dir>:/data -p 8080:8080/tcp ghcr.io/tgragnato/magnetico:latest --addr=0.0.0.0:8080 --database=sqlite3:///data/magnetico.sqlite3
+```
+
+#### From Source
+```bash
+# Install Go 1.21+
+go install --tags fts5 .
+# The magnetico binary is now available in your $GOBIN directory
+```
 
 ### PostgreSQL
 

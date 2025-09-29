@@ -1,0 +1,40 @@
+[Unit]
+Description=Magnetico DHT Search Engine
+After=network.target postgresql.service
+Wants=postgresql.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/magnetico
+ExecStart=/opt/magnetico/magnetico \
+  --addr=127.0.0.1:8080 \
+  --database=postgres://keynetworks:K3yn3tw0rk5@192.168.11.3:5432/magnetico?sslmode=disable \
+  --daemon \
+  --web \
+  --max-rps=500 \
+  --leech-max-n=1000
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGINT
+TimeoutStopSec=30
+User=magnetico
+Group=magnetico
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=magnetico
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/magnetico/data /opt/magnetico/logs
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

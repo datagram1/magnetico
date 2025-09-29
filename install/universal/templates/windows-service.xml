@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <id>Magnetico</id>
+    <name>Magnetico DHT Search Engine</name>
+    <description>DHT search engine for discovering and searching torrents</description>
+    <executable>C:\Program Files\Magnetico\magnetico.exe</executable>
+    <arguments>--config=C:\ProgramData\Magnetico\config.yml</arguments>
+    <workingdirectory>C:\Program Files\Magnetico</workingdirectory>
+    <logpath>C:\ProgramData\Magnetico\logs</logpath>
+    <logmode>rotate</logmode>
+    <depend></depend>
+    <startmode>Automatic</startmode>
+    <delayedAutoStart>true</delayedAutoStart>
+    <onfailure action="restart" delay="10 sec"/>
+    <onfailure action="restart" delay="20 sec"/>
+    <onfailure action="none"/>
+    <resetfailure>1 hour</resetfailure>
+    <serviceaccount>
+        <domain>NT AUTHORITY</domain>
+        <user>LocalService</user>
+        <allowservicelogon>true</allowservicelogon>
+    </serviceaccount>
+    <env name="GOMAXPROCS" value="0"/>
+</service>

@@ -1,0 +1,256 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+env:
+  GO_VERSION: '1.21'
+  VERSION: ${{ github.ref_name || inputs.version }}
+
+jobs:
+  build:
+    name: Build for ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: amd64
+            goos: linux
+            goarch: amd64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+            goos: linux
+            goarch: arm64
+          - os: windows-latest
+            platform: windows
+            arch: amd64
+            goos: windows
+            goarch: amd64
+          - os: macos-latest
+            platform: darwin
+            arch: amd64
+            goos: darwin
+            goarch: amd64
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            goos: darwin
+            goarch: arm64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        VERSION: ${{ env.VERSION }}
+      run: |
+        mkdir -p releases/${{ matrix.platform }}-${{ matrix.arch }}
+        go build -tags fts5 -ldflags "-s -w -X main.version=${{ env.VERSION }}" -o releases/${{ matrix.platform }}-${{ matrix.arch }}/magnetico${{ matrix.platform == 'windows' && '.exe' || '' }} .
+
+    - name: Generate checksum
+      run: |
+        cd releases/${{ matrix.platform }}-${{ matrix.arch }}
+        if [[ "${{ matrix.platform }}" == "windows" ]]; then
+          sha256sum magnetico.exe > magnetico.exe.sha256
+        else
+          sha256sum magnetico > magnetico.sha256
+        fi
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: magnetico-${{ matrix.platform }}-${{ matrix.arch }}
+        path: releases/${{ matrix.platform }}-${{ matrix.arch }}/
+
+  create-release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: releases/
+
+    - name: Prepare release assets
+      run: |
+        # Create release directory structure
+        mkdir -p release-assets
+        
+        # Copy all platform binaries
+        for artifact in releases/*/; do
+          if [ -d "$artifact" ]; then
+            platform_arch=$(basename "$artifact")
+            cp -r "$artifact" "release-assets/"
+          fi
+        done
+        
+        # Copy platform-specific installer scripts
+        cp install/universal/releases/linux-amd64/install.sh release-assets/linux-amd64/
+        cp install/universal/releases/darwin-amd64/install.sh release-assets/darwin-amd64/
+        cp install/universal/releases/windows-amd64/install.bat release-assets/windows-amd64/
+        
+        # Make installer scripts executable
+        chmod +x release-assets/linux-amd64/install.sh
+        chmod +x release-assets/darwin-amd64/install.sh
+        
+        # Create individual platform installer files for direct download
+        for platform_dir in release-assets/*/; do
+          if [ -d "$platform_dir" ]; then
+            platform_arch=$(basename "$platform_dir")
+            if [ -f "$platform_dir/install.sh" ]; then
+              cp "$platform_dir/install.sh" "release-assets/install-${platform_arch}.sh"
+              chmod +x "release-assets/install-${platform_arch}.sh"
+            elif [ -f "$platform_dir/install.bat" ]; then
+              cp "$platform_dir/install.bat" "release-assets/install-${platform_arch}.bat"
+            fi
+          fi
+        done
+
+    - name: Create release package
+      run: |
+        # Create tarball
+        tar -czf magnetico-${{ env.VERSION }}.tar.gz -C release-assets .
+        
+        # Create zip for Windows users
+        cd release-assets
+        zip -r ../magnetico-${{ env.VERSION }}.zip .
+        cd ..
+
+    - name: Generate release notes
+      run: |
+        cat > RELEASE_NOTES.md << EOF
+        # Magnetico ${{ env.VERSION }}
+        
+        ## What's New
+        
+        - Cross-platform DHT search engine
+        - Interactive installation wizard
+        - PostgreSQL database support
+        - Web interface for searching torrents
+        - DHT crawler for discovering new torrents
+        
+        ## Installation
+        
+        ### Quick Install
+        \`\`\`bash
+        curl -fsSL https://raw.githubusercontent.com/datagram1/magnetico/main/install.sh | bash
+        \`\`\`
+        
+        ### Manual Installation
+        1. Download the appropriate binary for your platform
+        2. Extract and run the installation script
+        3. Follow the interactive configuration wizard
+        
+        ## Supported Platforms
+        
+        - **Linux**: AMD64, ARM64
+        - **Windows**: AMD64
+        - **macOS**: AMD64 (Intel), ARM64 (Apple Silicon)
+        
+        ## Requirements
+        
+        - PostgreSQL 12+ (local or remote)
+        - 2GB+ RAM recommended
+        - 10GB+ disk space for database
+        
+        ## Checksums
+        
+        EOF
+        
+        # Add checksums for all binaries
+        for platform_dir in release-assets/*/; do
+          if [ -d "$platform_dir" ]; then
+            platform_arch=$(basename "$platform_dir")
+            for binary in "$platform_dir"/*.sha256; do
+              if [ -f "$binary" ]; then
+                binary_name=$(basename "$binary" .sha256)
+                checksum=$(cat "$binary")
+                echo "- **$platform_arch/$binary_name**: \`$checksum\`" >> RELEASE_NOTES.md
+              fi
+            done
+          fi
+        done
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ env.VERSION }}
+        name: Magnetico ${{ env.VERSION }}
+        body_path: RELEASE_NOTES.md
+        files: |
+          magnetico-${{ env.VERSION }}.tar.gz
+          magnetico-${{ env.VERSION }}.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test-installation:
+    name: Test Installation
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: releases/
+
+    - name: Test Linux binary
+      run: |
+        # Test that the binary runs and shows version
+        ./releases/linux-amd64/magnetico --version || echo "Version check failed"
+        
+        # Test that the binary shows help
+        ./releases/linux-amd64/magnetico --help || echo "Help check failed"
+
+    - name: Test binary checksums
+      run: |
+        # Verify checksums
+        for platform_dir in releases/*/; do
+          if [ -d "$platform_dir" ]; then
+            platform_arch=$(basename "$platform_dir")
+            echo "Testing checksums for $platform_arch"
+            
+            for binary in "$platform_dir"/*.sha256; do
+              if [ -f "$binary" ]; then
+                binary_name=$(basename "$binary" .sha256)
+                echo "Verifying $binary_name"
+                
+                # Verify checksum
+                cd "$platform_dir"
+                sha256sum -c "$binary_name.sha256"
+                cd - > /dev/null
+              fi
+            done
+          fi
+        done

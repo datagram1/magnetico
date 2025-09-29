@@ -13,3 +13,7 @@ go.work
 go.work.sum
 magnetico
 vendor/
+magnetico.zip
+magnetico_old/
+readme/
+prd/

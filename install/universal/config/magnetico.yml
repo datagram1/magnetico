@@ -1,0 +1,163 @@
+# Magnetico Configuration Template
+# This is a template configuration file for Magnetico DHT Search Engine
+# Copy this file to /etc/magnetico/config.yml and customize as needed
+
+# Database Configuration
+database:
+  # Database driver: postgresql, sqlite3
+  driver: postgresql
+  
+  # PostgreSQL Configuration
+  host: localhost
+  port: 5432
+  name: magnetico
+  user: magnetico
+  password: ""
+  
+  # SQLite Configuration (when driver is sqlite3)
+  # path: /var/lib/magnetico/magnetico.db
+  
+  # Connection pool settings
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 300s
+
+# Web Interface Configuration
+web:
+  # Host and port for the web interface
+  host: "127.0.0.1"
+  port: 8080
+  
+  # Security settings
+  enable_cors: true
+  cors_origins:
+    - "http://localhost"
+    - "http://127.0.0.1"
+  
+  # Rate limiting
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+    burst_size: 20
+  
+  # Static file serving
+  static_dir: "/opt/magnetico/static"
+  
+  # Template directory
+  template_dir: "/opt/magnetico/templates"
+
+# DHT Crawler Configuration
+dht:
+  # DHT port (UDP)
+  port: 6881
+  
+  # Bootstrap nodes for DHT network
+  bootstrap_nodes:
+    - "router.bittorrent.com:6881"
+    - "dht.transmissionbt.com:6881"
+    - "router.utorrent.com:6881"
+    - "dht.aelitis.com:6881"
+  
+  # Crawler settings
+  max_peers: 1000
+  max_torrents: 10000
+  crawl_interval: 30s
+  
+  # Network settings
+  read_timeout: 30s
+  write_timeout: 30s
+  dial_timeout: 10s
+
+# Logging Configuration
+logging:
+  # Log level: debug, info, warn, error
+  level: info
+  
+  # Log file path
+  file: "/var/log/magnetico/magnetico.log"
+  
+  # Log format: json, text
+  format: text
+  
+  # Log rotation
+  max_size: 100MB
+  max_age: 30
+  max_backups: 10
+  compress: true
+
+# Security Configuration
+security:
+  # Rate limiting for API endpoints
+  rate_limit:
+    enabled: true
+    requests_per_minute: 100
+    burst_size: 20
+  
+  # CORS settings
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost"
+      - "http://127.0.0.1"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+  
+  # API authentication (optional)
+  api_key: ""
+  
+  # Trusted proxy headers
+  trusted_proxies:
+    - "127.0.0.1"
+    - "::1"
+
+# Performance Configuration
+performance:
+  # Number of worker goroutines
+  workers: 4
+  
+  # Cache settings
+  cache:
+    enabled: true
+    size: 100MB
+    ttl: 300s
+  
+  # Database connection pool
+  db_pool:
+    max_open_conns: 25
+    max_idle_conns: 5
+    conn_max_lifetime: 300s
+
+# Monitoring Configuration
+monitoring:
+  # Enable metrics collection
+  metrics:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+  
+  # Health check endpoint
+  health:
+    enabled: true
+    path: "/health"
+  
+  # Profiling
+  pprof:
+    enabled: false
+    port: 6060
+
+# Development Configuration
+development:
+  # Enable debug mode
+  debug: false
+  
+  # Enable hot reload for templates
+  hot_reload: false
+  
+  # Enable verbose logging
+  verbose: false
+

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.magnetico</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/magnetico/magnetico</string>
+        <string>--config=/etc/magnetico/config.yml</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/opt/magnetico</string>
+    
+    <key>UserName</key>
+    <string>magnetico</string>
+    
+    <key>GroupName</key>
+    <string>staff</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/var/log/magnetico/magnetico.out.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/var/log/magnetico/magnetico.err.log</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+        <key>GOMAXPROCS</key>
+        <string>0</string>
+    </dict>
+    
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>65536</integer>
+        <key>NumberOfProcesses</key>
+        <integer>4096</integer>
+    </dict>
+    
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>65536</integer>
+        <key>NumberOfProcesses</key>
+        <integer>4096</integer>
+    </dict>
+</dict>
+</plist>
