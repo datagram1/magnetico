@@ -1,0 +1,20 @@
+# Cursor Rules for Magnetico Project
+
+## Testing and Debug Output
+- All testing artifacts, debug files, and temporary outputs should be placed in the `tmp/` directory
+- Test coverage reports, profiling data, and debug logs should be written to `tmp/`
+- Temporary files created during development should use the `tmp/` directory as the base path
+- When running tests, ensure any generated files are saved to `tmp/` to keep the project root clean
+
+## Project Structure
+- This is a Go project with a modular structure
+- Main application logic is in the root directory
+- Subdirectories contain specific functionality (bencode, dht, metadata, etc.)
+- Web interface is in the `web/` directory
+- Installation scripts and documentation are in `install/` directory
+
+## Development Guidelines
+- Follow Go best practices and conventions
+- Use the existing test patterns in the codebase
+- Maintain the current project structure and organization
+- Keep temporary and debug files isolated in `tmp/` directory

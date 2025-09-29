@@ -103,14 +103,19 @@ create_directories() {
 install_binary() {
     print_step "Installing Magnetico binary..."
     
-    # Copy binary to installation directory
-    if [ -f "magnetico" ]; then
+    # Check if binary was downloaded by the main installer
+    if [ -f "/tmp/magnetico" ]; then
+        cp "/tmp/magnetico" "$INSTALL_DIR/"
+        chmod +x "$INSTALL_DIR/magnetico"
+        chown "$SERVICE_USER:staff" "$INSTALL_DIR/magnetico"
+        print_success "Binary installed from /tmp/magnetico"
+    elif [ -f "magnetico" ]; then
         cp magnetico "$INSTALL_DIR/"
         chmod +x "$INSTALL_DIR/magnetico"
         chown "$SERVICE_USER:staff" "$INSTALL_DIR/magnetico"
-        print_success "Binary installed"
+        print_success "Binary installed from current directory"
     else
-        print_error "Binary file not found"
+        print_error "Binary file not found. Please ensure the main installer downloaded it."
         exit 1
     fi
 }
@@ -130,7 +135,7 @@ create_launchd_service() {
     <key>ProgramArguments</key>
     <array>
         <string>$INSTALL_DIR/magnetico</string>
-        <string>--config=$CONFIG_DIR/config.yml</string>
+        <string>--config-file-path=$CONFIG_DIR/config.yml</string>
     </array>
     
     <key>WorkingDirectory</key>

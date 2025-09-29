@@ -62,6 +62,7 @@ jobs:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
         VERSION: ${{ env.VERSION }}
+        CGO_ENABLED: 0
       run: |
         mkdir -p releases/${{ matrix.platform }}-${{ matrix.arch }}
         go build -tags fts5 -ldflags "-s -w -X main.version=${{ env.VERSION }}" -o releases/${{ matrix.platform }}-${{ matrix.arch }}/magnetico${{ matrix.platform == 'windows' && '.exe' || '' }} .
@@ -205,6 +206,21 @@ jobs:
         files: |
           magnetico-${{ env.VERSION }}.tar.gz
           magnetico-${{ env.VERSION }}.zip
+          release-assets/install-linux-amd64.sh
+          release-assets/install-linux-arm64.sh
+          release-assets/install-darwin-amd64.sh
+          release-assets/install-darwin-arm64.sh
+          release-assets/install-windows-amd64.bat
+          release-assets/linux-amd64/magnetico
+          release-assets/linux-amd64/magnetico.sha256
+          release-assets/linux-arm64/magnetico
+          release-assets/linux-arm64/magnetico.sha256
+          release-assets/darwin-amd64/magnetico
+          release-assets/darwin-amd64/magnetico.sha256
+          release-assets/darwin-arm64/magnetico
+          release-assets/darwin-arm64/magnetico.sha256
+          release-assets/windows-amd64/magnetico.exe
+          release-assets/windows-amd64/magnetico.exe.sha256
         draft: false
         prerelease: false
       env:

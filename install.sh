@@ -105,7 +105,48 @@ download_and_run_installer() {
             print_status "Or download and run the installer manually from:"
             echo -e "${BLUE}$installer_url${NC}"
         else
-            curl -fsSL "$installer_url" | bash
+            # Create a temporary script that downloads the binary and installer
+            local temp_script=$(mktemp)
+            cat > "$temp_script" << EOF
+#!/bin/bash
+set -e
+
+# Download the binary
+BINARY_URL="$LATEST_RELEASE_URL/${platform}-${arch}/magnetico"
+INSTALLER_URL="$installer_url"
+
+print_status() {
+    echo -e "\033[0;34m[INFO]\033[0m \$1"
+}
+
+print_success() {
+    echo -e "\033[0;32m[SUCCESS]\033[0m \$1"
+}
+
+print_error() {
+    echo -e "\033[0;31m[ERROR]\033[0m \$1"
+}
+
+print_status "Downloading Magnetico binary..."
+if curl -fsSL -o "/tmp/magnetico" "\$BINARY_URL"; then
+    chmod +x "/tmp/magnetico"
+    print_success "Binary downloaded successfully"
+else
+    print_error "Failed to download binary"
+    exit 1
+fi
+
+print_status "Downloading installer script..."
+if curl -fsSL "\$INSTALLER_URL" | bash; then
+    print_success "Installation completed"
+else
+    print_error "Installation failed"
+    exit 1
+fi
+EOF
+            chmod +x "$temp_script"
+            bash "$temp_script"
+            rm -f "$temp_script"
         fi
     elif command_exists wget; then
         if [ "$platform" = "windows" ]; then
@@ -117,7 +158,48 @@ download_and_run_installer() {
             print_status "Or download and run the installer manually from:"
             echo -e "${BLUE}$installer_url${NC}"
         else
-            wget -qO- "$installer_url" | bash
+            # Create a temporary script that downloads the binary and installer
+            local temp_script=$(mktemp)
+            cat > "$temp_script" << EOF
+#!/bin/bash
+set -e
+
+# Download the binary
+BINARY_URL="$LATEST_RELEASE_URL/${platform}-${arch}/magnetico"
+INSTALLER_URL="$installer_url"
+
+print_status() {
+    echo -e "\033[0;34m[INFO]\033[0m \$1"
+}
+
+print_success() {
+    echo -e "\033[0;32m[SUCCESS]\033[0m \$1"
+}
+
+print_error() {
+    echo -e "\033[0;31m[ERROR]\033[0m \$1"
+}
+
+print_status "Downloading Magnetico binary..."
+if wget -qO "/tmp/magnetico" "\$BINARY_URL"; then
+    chmod +x "/tmp/magnetico"
+    print_success "Binary downloaded successfully"
+else
+    print_error "Failed to download binary"
+    exit 1
+fi
+
+print_status "Downloading installer script..."
+if wget -qO- "\$INSTALLER_URL" | bash; then
+    print_success "Installation completed"
+else
+    print_error "Installation failed"
+    exit 1
+fi
+EOF
+            chmod +x "$temp_script"
+            bash "$temp_script"
+            rm -f "$temp_script"
         fi
     else
         print_error "Neither curl nor wget is available. Please install one of them."
