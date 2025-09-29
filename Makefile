@@ -27,6 +27,7 @@ help: ## Show this help message
 	@echo "  make build-all          # Build all platforms using Docker for x86"
 	@echo "  make build-local-arm    # Build macOS ARM64 locally"
 	@echo "  make build-docker       # Build x86 platforms using Docker"
+	@echo "  make build-docker-preconfigured # Build pre-configured Docker image"
 	@echo "  make clean              # Clean build artifacts"
 
 # Version management
