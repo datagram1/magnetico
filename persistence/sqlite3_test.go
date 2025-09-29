@@ -15,7 +15,7 @@ func newDb(t *testing.T) Database {
 	db, e := makeSqlite3Database(&url.URL{
 		Scheme:   "sqlite3",
 		Path:     t.Name(),
-		RawQuery: "cache=shared&mode=memory",
+		RawQuery: "cache=shared&mode=memory&_fts5=1",
 	})
 	if e != nil {
 		t.Errorf("newDb(t): Could not create in-memory database %s. error = %v", t.Name(), e)

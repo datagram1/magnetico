@@ -16,6 +16,12 @@ import (
 	"tgragnato.it/magnetico/v2/web"
 )
 
+// Version and build time variables set by build system
+var (
+	version   = "dev"
+	buildTime = "unknown"
+)
+
 func main() {
 	// opFlags is the "operational flags"
 	opFlags := opflags.OpFlags{}

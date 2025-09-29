@@ -36,6 +36,14 @@ type IndexingResult struct {
 	peerAddrs []net.TCPAddr
 }
 
+// NewIndexingResult creates a new IndexingResult
+func NewIndexingResult(infoHash [20]byte, peerAddrs []net.TCPAddr) IndexingResult {
+	return IndexingResult{
+		infoHash:  infoHash,
+		peerAddrs: peerAddrs,
+	}
+}
+
 func (ir IndexingResult) InfoHash() [20]byte {
 	return ir.infoHash
 }

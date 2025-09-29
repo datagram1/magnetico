@@ -107,7 +107,7 @@ func initDb() {
 	dbUrl := url.URL{
 		Scheme:   "sqlite3",
 		Path:     "/web.db",
-		RawQuery: "cache=shared&mode=memory",
+		RawQuery: "cache=shared&mode=memory&_fts5=1",
 	}
 	database, _ = persistence.MakeDatabase(dbUrl.String())
 }
